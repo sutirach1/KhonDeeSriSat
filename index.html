@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบแดชบอร์ดงบประมาณและการจัดซื้อจัดจ้าง | เทศบาลเมืองศรีสัชนาลัย (ปี 2568 - 2569)</title>
+  <meta name="description" content="ระบบแดชบอร์ดวิเคราะห์การจัดซื้อจัดจ้างและการใช้งบประมาณ เทศบาลเมืองศรีสัชนาลัย จ.สุโขทัย ประจำปีงบประมาณ 2568 - 2569 ข้อมูล e-GP โปร่งใส ประมวลผลรวดเร็ว">
+  
+  <!-- Google Fonts: Prompt & Sarabun & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS for Interactive Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Dashboard Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="dashboard-wrapper">
+    
+    <!-- Top Global Header -->
+    <header class="main-header" id="mainHeader">
+      <div class="header-container">
+        <div class="header-brand">
+          <div class="brand-crest">
+            <svg viewBox="0 0 48 48" class="crest-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="22" stroke="url(#goldGrad)" stroke-width="2.5" fill="rgba(15, 23, 42, 0.9)"/>
+              <path d="M24 8L30 18H18L24 8Z" fill="url(#goldGrad)"/>
+              <path d="M14 20H34V24C34 29.5228 29.5228 34 24 34C18.4772 34 14 29.5228 14 24V20Z" stroke="url(#goldGrad)" stroke-width="2" fill="none"/>
+              <circle cx="24" cy="27" r="3.5" fill="#38bdf8"/>
+              <path d="M20 37H28M17 40H31" stroke="url(#goldGrad)" stroke-width="2" stroke-linecap="round"/>
+              <defs>
+                <linearGradient id="goldGrad" x1="8" y1="8" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#fbbf24"/>
+                  <stop offset="0.5" stop-color="#f59e0b"/>
+                  <stop offset="1" stop-color="#d97706"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <div class="brand-badge-row">
+              <span class="badge-status-dot"></span>
+              <span class="brand-badge">ระบบติดตามงบประมาณ e-GP</span>
+              <span class="brand-badge-sub">จ.สุโขทัย</span>
+            </div>
+            <h1 class="brand-title">เทศบาลเมืองศรีสัชนาลัย</h1>
+            <p class="brand-subtitle">แดชบอร์ดติดตามและวิเคราะห์การใช้งบประมาณรายจ่าย ประจำปี 2568 – 2569</p>
+          </div>
+        </div>
+
+        <!-- Header Actions & Year Selector -->
+        <div class="header-actions">
+          <div class="fiscal-year-selector" role="group" aria-label="เลือกปีงบประมาณ">
+            <button type="button" class="fy-btn active" data-year="compare" id="btnYearCompare">
+              <span class="fy-icon">⚖️</span>
+              <span class="fy-text">เปรียบเทียบ 68 vs 69</span>
+            </button>
+            <button type="button" class="fy-btn" data-year="2569" id="btnYear69">
+              <span class="fy-icon">📊</span>
+              <span class="fy-text">ปีงบฯ 2569</span>
+              <span class="fy-count">644 โครงการ</span>
+            </button>
+            <button type="button" class="fy-btn" data-year="2568" id="btnYear68">
+              <span class="fy-icon">📈</span>
+              <span class="fy-text">ปีงบฯ 2568</span>
+              <span class="fy-count">521 โครงการ</span>
+            </button>
+          </div>
+
+          <div class="quick-tools">
+            <button class="tool-btn" id="themeToggleBtn" title="สลับโหมดมืด/สว่าง">
+              <span class="theme-icon-dark">🌙</span>
+              <span class="theme-icon-light">☀️</span>
+            </button>
+            <button class="tool-btn" id="printReportBtn" title="พิมพ์รายงานสรุป">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            </button>
+            <button class="tool-btn primary-export-btn" id="exportAllCsvBtn" title="ส่งออกข้อมูลเป็น CSV">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              <span>ส่งออก CSV</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs-bar" id="mainNavBar">
+        <div class="nav-container">
+          <button class="nav-tab active" data-tab="tab-overview" id="tabOverviewBtn">
+            <svg class="tab-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>ภาพรวมงบประมาณ (Overview)</span>
+          </button>
+          <button class="nav-tab" data-tab="tab-insights" id="tabInsightsBtn">
+            <svg class="tab-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>บทวิเคราะห์เชิงลึก (Fiscal Insights)</span>
+            <span class="nav-tab-tag">5 มิติ</span>
+          </button>
+          <button class="nav-tab" data-tab="tab-map" id="tabMapBtn">
+            <svg class="tab-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            <span>แผนที่พิกัดโครงการ (GIS Map)</span>
+            <span class="nav-tab-tag count-pill" id="geoCountBadge">17 จุด</span>
+          </button>
+          <button class="nav-tab" data-tab="tab-vendors" id="tabVendorsBtn">
+            <svg class="tab-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>ทำเนียบคู่สัญญา (Top Contractors)</span>
+          </button>
+          <button class="nav-tab" data-tab="tab-projects" id="tabProjectsBtn">
+            <svg class="tab-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>ค้นหาโครงการ (Project Explorer)</span>
+            <span class="nav-tab-tag" id="tabTotalProjectsBadge">1,165 รายการ</span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-body" id="mainContent">
+
+      <!-- ================= TAB 1: OVERVIEW ================= -->
+      <section class="tab-pane active" id="tab-overview">
+        
+        <!-- Context Banner -->
+        <div class="context-banner" id="contextBanner">
+          <div class="banner-content">
+            <div class="banner-icon">💡</div>
+            <div class="banner-info">
+              <h2 class="banner-title" id="bannerTitle">สรุปเปรียบเทียบภาพรวมงบประมาณ ปี 2568 และ ปี 2569</h2>
+              <p class="banner-desc" id="bannerDesc">
+                เทศบาลเมืองศรีสัชนาลัยมีงบประมาณจัดซื้อจัดจ้างรวม 2 ปี เป็นเงิน <strong>65,098,253.47 บาท</strong> 
+                โดยปี 2569 มีการขยายตัวของงบประมาณเพิ่มขึ้นถึง <strong>+57.36%</strong> เพื่อรองรับงานก่อสร้างและพัฒนาถนนสายหลักในพื้นที่
+              </p>
+            </div>
+          </div>
+          <div class="banner-highlights" id="bannerHighlights">
+            <div class="banner-stat">
+              <span class="bs-label">การเติบโตของงบประมาณ</span>
+              <span class="bs-value positive">+57.36%</span>
+            </div>
+            <div class="banner-stat">
+              <span class="bs-label">ประหยัดงบได้รวม</span>
+              <span class="bs-value highlight">2.46 ล้านบาท</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 High Impact KPI Cards -->
+        <div class="kpi-grid">
+          
+          <!-- Card 1: Total Budget -->
+          <div class="kpi-card glass-panel" id="kpiBudgetCard">
+            <div class="kpi-header">
+              <div class="kpi-icon-wrapper bg-blue">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <span class="kpi-pill" id="kpiBudgetBadge">+57.36% YoY</span>
+            </div>
+            <div class="kpi-body">
+              <span class="kpi-label">งบประมาณตั้งไว้ (Total Budget)</span>
+              <div class="kpi-value-row">
+                <span class="kpi-main-val" id="kpiBudgetVal">฿39,803,684.69</span>
+              </div>
+              <p class="kpi-subtext" id="kpiBudgetSub">ปี 68: ฿25.29M ➔ ปี 69: ฿39.80M</p>
+            </div>
+          </div>
+
+          <!-- Card 2: Agreed Price (Contract Disbursed) -->
+          <div class="kpi-card glass-panel" id="kpiAgreeCard">
+            <div class="kpi-header">
+              <div class="kpi-icon-wrapper bg-indigo">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <span class="kpi-pill" id="kpiAgreeBadge">+62.24% YoY</span>
+            </div>
+            <div class="kpi-body">
+              <span class="kpi-label">มูลค่าสัญญาที่ลงนาม (Agreed Contracts)</span>
+              <div class="kpi-value-row">
+                <span class="kpi-main-val" id="kpiAgreeVal">฿38,750,229.89</span>
+              </div>
+              <p class="kpi-subtext" id="kpiAgreeSub">รวม 2 ปี: ฿62,635,079.67</p>
+            </div>
+          </div>
+
+          <!-- Card 3: Budget Savings -->
+          <div class="kpi-card glass-panel" id="kpiSavingsCard">
+            <div class="kpi-header">
+              <div class="kpi-icon-wrapper bg-emerald">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+              <span class="kpi-pill positive" id="kpiSavingsBadge">2.65% อัตราประหยัด</span>
+            </div>
+            <div class="kpi-body">
+              <span class="kpi-label">งบประมาณที่ประหยัดได้ (Savings)</span>
+              <div class="kpi-value-row">
+                <span class="kpi-main-val text-emerald" id="kpiSavingsVal">฿1,053,454.80</span>
+              </div>
+              <p class="kpi-subtext" id="kpiSavingsSub">ส่วนต่างระหว่างวงเงินงบฯ กับราคาลงนาม</p>
+            </div>
+          </div>
+
+          <!-- Card 4: Total Projects -->
+          <div class="kpi-card glass-panel" id="kpiCountCard">
+            <div class="kpi-header">
+              <div class="kpi-icon-wrapper bg-purple">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+              </div>
+              <span class="kpi-pill" id="kpiCountBadge">+123 โครงการ</span>
+            </div>
+            <div class="kpi-body">
+              <span class="kpi-label">จำนวนโครงการ (Total Projects)</span>
+              <div class="kpi-value-row">
+                <span class="kpi-main-val" id="kpiCountVal">644 โครงการ</span>
+              </div>
+              <p class="kpi-subtext" id="kpiCountSub">ปี 68: 521 ➔ ปี 69: 644 (+23.6%)</p>
+            </div>
+          </div>
+
+          <!-- Card 5: Average Value -->
+          <div class="kpi-card glass-panel" id="kpiAvgCard">
+            <div class="kpi-header">
+              <div class="kpi-icon-wrapper bg-amber">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+              </div>
+              <span class="kpi-pill" id="kpiAvgBadge">+31.25% เฉลี่ยต่อโครงการ</span>
+            </div>
+            <div class="kpi-body">
+              <span class="kpi-label">มูลค่าเฉลี่ยต่อโครงการ (Avg Value)</span>
+              <div class="kpi-value-row">
+                <span class="kpi-main-val" id="kpiAvgVal">฿60,171.16</span>
+              </div>
+              <p class="kpi-subtext" id="kpiAvgSub">เพิ่มขึ้นจาก ฿45,844.24 ในปี 68</p>
+            </div>
+          </div>
+
+          <!-- Card 6: e-Bidding Share -->
+          <div class="kpi-card glass-panel" id="kpiEbiddingCard">
+            <div class="kpi-header">
+              <div class="kpi-icon-wrapper bg-rose">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              </div>
+              <span class="kpi-pill alert" id="kpiEbiddingBadge">กฎ 80/20</span>
+            </div>
+            <div class="kpi-body">
+              <span class="kpi-label">สัดส่วน e-Bidding (มูลค่าเงิน)</span>
+              <div class="kpi-value-row">
+                <span class="kpi-main-val text-rose" id="kpiEbiddingVal">51.66%</span>
+              </div>
+              <p class="kpi-subtext" id="kpiEbiddingSub">7 โครงการ e-Bidding ครอง ฿20.02M</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Charts Grid 1: Main Category & Procurement Method -->
+        <div class="charts-row">
+          
+          <!-- Category Expenditure Chart -->
+          <div class="chart-card glass-panel col-8">
+            <div class="chart-card-header">
+              <div class="chart-title-area">
+                <span class="chart-badge">การจัดสรรงบประมาณ</span>
+                <h3 class="chart-title" id="chartCategoryTitle">งบประมาณและวงเงินสัญญา จำแนกตามหมวดหมู่งาน</h3>
+                <p class="chart-subtitle">แสดงสัดส่วนวงเงินสัญญาและงบประมาณในแต่ละภารกิจของเทศบาล</p>
+              </div>
+              <div class="chart-actions">
+                <button class="mini-btn" id="btnToggleCatSort" title="สลับเรียงมูลค่า">สลับเรียง</button>
+              </div>
+            </div>
+            <div class="chart-canvas-container" style="height: 340px;">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Purchase Method Pareto Donut Chart -->
+          <div class="chart-card glass-panel col-4">
+            <div class="chart-card-header">
+              <div class="chart-title-area">
+                <span class="chart-badge">วิธีการจัดซื้อจัดจ้าง</span>
+                <h3 class="chart-title">สัดส่วน e-Bidding vs เฉพาะเจาะจง</h3>
+                <p class="chart-subtitle">เปรียบเทียบจำนวนโครงการ vs มูลค่าเม็ดเงินจริง</p>
+              </div>
+            </div>
+            <div class="chart-canvas-container" style="height: 250px;">
+              <canvas id="methodChart"></canvas>
+            </div>
+            <div class="method-legend-stats" id="methodLegendStats">
+              <!-- populated dynamically -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Charts Grid 2: Timeline Spending & Project Types & Tier Range -->
+        <div class="charts-row">
+          
+          <!-- Monthly Fiscal Spending Curve -->
+          <div class="chart-card glass-panel col-6">
+            <div class="chart-card-header">
+              <div class="chart-title-area">
+                <span class="chart-badge">วงรอบงบประมาณ (Fiscal Timeline)</span>
+                <h3 class="chart-title">แนวโน้มการลงนามสัญญาตามรอบปีงบประมาณ (ต.ค. - ก.ย.)</h3>
+                <p class="chart-subtitle">วิเคราะห์ช่วงเวลาที่มีการเบิกจ่ายและเร่งรัดโครงการสูงสุด</p>
+              </div>
+            </div>
+            <div class="chart-canvas-container" style="height: 290px;">
+              <canvas id="timelineChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Project Types & Price Tiers -->
+          <div class="chart-card glass-panel col-3">
+            <div class="chart-card-header">
+              <div class="chart-title-area">
+                <span class="chart-badge">ประเภทโครงการ</span>
+                <h3 class="chart-title">สัดส่วนประเภทการจัดซื้อ</h3>
+                <p class="chart-subtitle">จ้างก่อสร้าง / ซื้อ / จ้างเหมา / เช่า</p>
+              </div>
+            </div>
+            <div class="chart-canvas-container" style="height: 290px;">
+              <canvas id="typeChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card glass-panel col-3">
+            <div class="chart-card-header">
+              <div class="chart-title-area">
+                <span class="chart-badge">การกระจายขนาดวงเงิน</span>
+                <h3 class="chart-title">ช่วงขนาดสัญญา (Tiers)</h3>
+                <p class="chart-subtitle">การกระจายตัวของขนาดโครงการ</p>
+              </div>
+            </div>
+            <div class="chart-canvas-container" style="height: 290px;">
+              <canvas id="tierChart"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Quick Top 5 Projects Highlight Table -->
+        <div class="table-card glass-panel">
+          <div class="table-card-header">
+            <div>
+              <span class="chart-badge">โครงการขนาดใหญ่ (Megaprojects)</span>
+              <h3 class="table-title">5 อันดับโครงการที่มีมูลค่าสัญญาลงนามสูงสุด</h3>
+            </div>
+            <button class="mini-btn primary" id="btnGoToProjectsTab">ดูโครงการทั้งหมด ➔</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="top5Table">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">อันดับ</th>
+                  <th>รหัส / ชื่อโครงการ</th>
+                  <th>ประเภท</th>
+                  <th>วิธีการจัดหา</th>
+                  <th class="text-right">งบประมาณ</th>
+                  <th class="text-right">ราคาสัญญา</th>
+                  <th class="text-right">ประหยัดได้</th>
+                  <th>ผู้ชนะการเสนอราคา</th>
+                  <th>วันลงนาม</th>
+                </tr>
+              </thead>
+              <tbody id="top5TableBody">
+                <!-- populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 2: DEEP FISCAL INSIGHTS ================= -->
+      <section class="tab-pane" id="tab-insights">
+        
+        <div class="insights-hero">
+          <div class="insights-hero-content">
+            <span class="hero-tag">รายงานการวิเคราะห์เชิงยุทธศาสตร์</span>
+            <h2 class="insights-hero-title">บทวิเคราะห์โครงสร้างและการใช้งบประมาณ เทศบาลเมืองศรีสัชนาลัย</h2>
+            <p class="insights-hero-desc">
+              การวิเคราะห์เชิงลึกจากฐานข้อมูลระบบจัดซื้อจัดจ้างภาครัฐ (e-GP) ของกรมบัญชีกลาง ประจำปีงบประมาณ 2568 และ 2569
+              เพื่อสร้างความโปร่งใส ชี้แจงประสิทธิภาพความคุ้มค่า (Value for Money) และการขับเคลื่อนการพัฒนาท้องถิ่น
+            </p>
+          </div>
+          <div class="insights-summary-chips">
+            <div class="chip-item">
+              <span class="chip-num">1,165</span>
+              <span class="chip-text">โครงการวิเคราะห์รวม</span>
+            </div>
+            <div class="chip-item">
+              <span class="chip-num">65.10M</span>
+              <span class="chip-text">งบประมาณจัดซื้อจัดจ้าง</span>
+            </div>
+            <div class="chip-item">
+              <span class="chip-num">2.46M</span>
+              <span class="chip-text">ประหยัดงบประมาณสะสม</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="insights-grid">
+          
+          <!-- Chapter 1: Budget Growth & Strategic Expansion -->
+          <article class="insight-article glass-panel">
+            <div class="article-icon-col">
+              <div class="article-num">01</div>
+              <div class="article-icon bg-blue">📈</div>
+            </div>
+            <div class="article-content">
+              <div class="article-header">
+                <span class="article-category">การขยายตัวทางการคลัง (Fiscal Expansion)</span>
+                <h3 class="article-title">การเติบโตของงบประมาณอย่างก้าวกระโดด (+57.36%) ในปี 2569</h3>
+              </div>
+              <div class="article-body">
+                <p>
+                  ในปีงบประมาณ 2569 เทศบาลเมืองศรีสัชนาลัยได้รับจัดสรรและดำเนินโครงการจัดซื้อจัดจ้างรวม <strong>39,803,684.69 บาท</strong> 
+                  เพิ่มขึ้นจากปี 2568 (25,294,568.78 บาท) ถึง <strong>14,509,115.91 บาท (+57.36%)</strong> 
+                  และมีจำนวนโครงการเพิ่มขึ้น <strong>+23.61%</strong> (จาก 521 โครงการ เป็น 644 โครงการ)
+                </p>
+                <div class="insight-callout">
+                  <strong>ปัจจัยขับเคลื่อนหลัก (Key Driver):</strong> การเติบโตเกิดจากการจัดสรรงบประมาณโครงการพัฒนาโครงสร้างพื้นฐานคมนาคมขนาดใหญ่ 
+                  โดยเฉพาะโครงการถนนแอสฟัลท์ติกคอนกรีตสายบ่อแก้ว-บ่อทอง บ้านป่ากล้วย ม.1 ต.ท่าชัย มูลค่าสัญญากว่า <strong>9.25 ล้านบาท</strong> 
+                  และโครงการปรับปรุงถนนอนุสาวรีย์พระมหาธรรมราชาที่ 1 มูลค่า <strong>3.19 ล้านบาท</strong>
+                </div>
+              </div>
+              <div class="article-footer">
+                <div class="metric-badge">งบปี 68: ฿25.29M</div>
+                <div class="metric-arrow">➔</div>
+                <div class="metric-badge active">งบปี 69: ฿39.80M (+57.4%)</div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Chapter 2: Pareto Principle 80/20 -->
+          <article class="insight-article glass-panel">
+            <div class="article-icon-col">
+              <div class="article-num">02</div>
+              <div class="article-icon bg-rose">⚖️</div>
+            </div>
+            <div class="article-content">
+              <div class="article-header">
+                <span class="article-category">โครงสร้างการจัดหา (Procurement Structure)</span>
+                <h3 class="article-title">ปรากฏการณ์กฎพาเรโต (Pareto Principle): 1.5% ของโครงการ ครองเม็ดเงินเกิน 50%</h3>
+              </div>
+              <div class="article-body">
+                <p>
+                  สถิติแสดงให้เห็นความแตกต่างอย่างชัดเจนระหว่าง "จำนวนโครงการ" กับ "มูลค่าเงินงบประมาณ":
+                </p>
+                <div class="pareto-dual-cards">
+                  <div class="pd-card">
+                    <h4>วิธีเฉพาะเจาะจง (Small & Routine)</h4>
+                    <p class="pd-stat">98.5% ของโครงการ (1,148 จาก 1,165 โครงการ)</p>
+                    <p class="pd-sub">ครองเม็ดเงิน 47.3% (29.63 ล้านบาท) เป็นโครงการจัดซื้อวัสดุ ซ่อมบำรุง อาหารเสริมนม และงานจ้างบริการรายย่อยในชุมชน</p>
+                  </div>
+                  <div class="pd-card highlight-rose">
+                    <h4>วิธีประกวดราคา e-Bidding (Megaprojects)</h4>
+                    <p class="pd-stat">เพียง 1.5% ของโครงการ (17 จาก 1,165 โครงการ)</p>
+                    <p class="pd-sub">ครองเม็ดเงินถึง 52.7% (33.01 ล้านบาท) เป็นงานก่อสร้างถนนสายหลัก เครื่องจักร และการเช่ายานพาหนะ</p>
+                  </div>
+                </div>
+                <p class="mt-2 text-muted">
+                  <strong>นัยสำคัญในการกำกับดูแล:</strong> ผู้ตรวจสอบและผู้บริหารสามารถควบคุมความเสี่ยงทางการคลังได้มากกว่าครึ่งหนึ่งของงบประมาณทั้งปี 
+                  โดยการติดตามโครงการ e-Bidding เพียงไม่กี่โครงการอย่างใกล้ชิด
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <!-- Chapter 3: Value for Money & Savings -->
+          <article class="insight-article glass-panel">
+            <div class="article-icon-col">
+              <div class="article-num">03</div>
+              <div class="article-icon bg-emerald">💰</div>
+            </div>
+            <div class="article-content">
+              <div class="article-header">
+                <span class="article-category">ประสิทธิภาพและความคุ้มค่า (Value for Money)</span>
+                <h3 class="article-title">วิเคราะห์การประหยัดงบประมาณ: การแข่งขันใน e-Bidding สร้างความคุ้มค่าสูงสุด</h3>
+              </div>
+              <div class="article-body">
+                <p>
+                  การจัดซื้อจัดจ้างของเทศบาลเมืองศรีสัชนาลัยสามารถประหยัดงบประมาณได้รวม <strong>2,463,173.80 บาท</strong> ตลอด 2 ปีงบประมาณ 
+                  (ปี 68 ประหยัด 1.41 ล้านบาท หรือ 5.57% และ ปี 69 ประหยัด 1.05 ล้านบาท หรือ 2.65%)
+                </p>
+                <div class="savings-analysis-box">
+                  <div class="sab-item">
+                    <span class="sab-title">e-Bidding (การแข่งขันทางราคา)</span>
+                    <span class="sab-val text-emerald">ประหยัดรวม 1.83 ล้านบาท</span>
+                    <span class="sab-desc">คิดเป็น 74.3% ของเงินที่ประหยัดได้ทั้งหมด จากการเสนอราคาแข่งขันของผู้รับเหมาภายนอก</span>
+                  </div>
+                  <div class="sab-item">
+                    <span class="sab-title">วิธีเฉพาะเจาะจง</span>
+                    <span class="sab-val text-blue">ประหยัดรวม 0.63 ล้านบาท</span>
+                    <span class="sab-desc">ราคาตกลงส่วนใหญ่ตรงกับงบประมาณหรือลดลงเล็กน้อยตามการเจรจาต่อรองตามระเบียบ</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Chapter 4: Civic Welfare & Education -->
+          <article class="insight-article glass-panel">
+            <div class="article-icon-col">
+              <div class="article-num">04</div>
+              <div class="article-icon bg-purple">🤝</div>
+            </div>
+            <div class="article-content">
+              <div class="article-header">
+                <span class="article-category">การพัฒนาคุณภาพชีวิต (Civic Welfare & Inclusion)</span>
+                <h3 class="article-title">ภารกิจสวัสดิการชุมชน: ดูแลโภชนาการเด็ก ซ่อมแซมบ้านผู้สูงอายุ และผู้พิการ</h3>
+              </div>
+              <div class="article-body">
+                <p>
+                  นอกจากงานถนน เทศบาลเมืองศรีสัชนาลัยมีการจัดสรรงบประมาณกระจายสู่ประชาชนกลุ่มเปราะบางอย่างสม่ำเสมอ:
+                </p>
+                <ul class="insight-list">
+                  <li>
+                    <strong>อาหารเสริมนมโรงเรียน (โภชนาการเยาวชน):</strong> มีการจัดซื้อทั้งนมพาสเจอร์ไรส์และนม ยู.เอช.ที. ครอบคลุมทุกภาคเรียน 
+                    ยอดรวมสัญญา 2 ปีกว่า <strong>4.89 ล้านบาท</strong> โดยมีคู่สัญญาภาครัฐที่ได้มาตรฐาน ได้แก่ องค์การส่งเสริมกิจการโคนมแห่งประเทศไทย (อ.ส.ค.) และ วิทยาลัยเกษตรและเทคโนโลยีสุโขทัย
+                  </li>
+                  <li>
+                    <strong>ปรับสภาพแวดล้อมที่อยู่อาศัยผู้สูงอายุและคนพิการ:</strong> ปี 2568 จัดสรรงบซ่อมบ้านผู้สูงอายุ 12 ราย และคนพิการ 3 ราย, 
+                    ปี 2569 จัดสรรเพิ่มอีก 11 หลัง รวมงบประมาณกว่า <strong>1.1 ล้านบาท</strong> เพื่อความปลอดภัยในชีวิตประจำวัน
+                  </li>
+                  <li>
+                    <strong>นันทนาการและสุขภาพ:</strong> จัดซื้อเครื่องเล่นสนามกลางแจ้ง และเครื่องออกกำลังกายกลางแจ้งพร้อมฐาน ค.ส.ล. สำหรับศูนย์พัฒนาเด็กเล็กและโรงเรียนในสังกัดเทศบาล
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </article>
+
+          <!-- Chapter 5: Vendor Concentration & Market Share -->
+          <article class="insight-article glass-panel">
+            <div class="article-icon-col">
+              <div class="article-num">05</div>
+              <div class="article-icon bg-amber">🏢</div>
+            </div>
+            <div class="article-content">
+              <div class="article-header">
+                <span class="article-category">การกระจายตัวของคู่สัญญา (Vendor Concentration)</span>
+                <h3 class="article-title">วิเคราะห์ส่วนแบ่งตลาดคู่สัญญา (Top Contractors & Market Share)</h3>
+              </div>
+              <div class="article-body">
+                <p>
+                  จากการวิเคราะห์คู่สัญญากว่า 200 ราย พบว่าในส่วนของงาน e-Bidding ขนาดใหญ่ มีการหมุนเวียนและกระจายงานให้กับผู้ประกอบการที่มีศักยภาพ:
+                </p>
+                <div class="table-responsive mt-2">
+                  <table class="mini-data-table">
+                    <thead>
+                      <tr>
+                        <th>ชื่อคู่สัญญาชั้นนำ</th>
+                        <th>ผลงานเด่น / สัญญาหลัก</th>
+                        <th class="text-right">มูลค่าสัญญารวม</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>บริษัท พรานกระต่าย ไมนิ่ง จำกัด</strong></td>
+                        <td>ก่อสร้างปรับปรุงผิวจราจรแอสฟัลท์ติกคอนกรีต สายบ่อแก้ว-บ่อทอง</td>
+                        <td class="text-right text-emerald">฿9,250,000.00</td>
+                      </tr>
+                      <tr>
+                        <td><strong>ห้างหุ้นส่วนจำกัด รัตนนาคะ</strong></td>
+                        <td>ก่อสร้างถนน คสล. ซอยข้างศูนย์วิจัยพืชสวนสุโขทัย + ถนนโรงเรียนเทศบาล</td>
+                        <td class="text-right text-emerald">฿6,981,720.00</td>
+                      </tr>
+                      <tr>
+                        <td><strong>ห้างหุ้นส่วนจำกัด สุวรรณ แอสฟัลท์ (2012)</strong></td>
+                        <td>ปรับปรุงถนนข้างโรงเรียนไชยะวิทยา และก่อสร้างถนนแอสฟัลต์ ม.1 ต.ท่าชัย</td>
+                        <td class="text-right text-emerald">฿5,873,500.00</td>
+                      </tr>
+                      <tr>
+                        <td><strong>บริษัท โรงโม่หิน ศิลาประทุม แกรนิต จำกัด</strong></td>
+                        <td>ปรับปรุงผิวจราจรแอสฟัลท์ติกคอนกรีต อนุสาวรีย์พระมหาธรรมราชาที่ 1</td>
+                        <td class="text-right text-emerald">฿3,185,000.00</td>
+                      </tr>
+                      <tr>
+                        <td><strong>วิทยาลัยเกษตรและเทคโนโลยีสุโขทัย</strong></td>
+                        <td>คู่สัญญาจัดส่งอาหารเสริมนมโรงเรียน (นมพาสเจอร์ไรส์ และ ยู.เอช.ที.)</td>
+                        <td class="text-right text-emerald">฿2,577,381.34</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 3: GIS INTERACTIVE MAP ================= -->
+      <section class="tab-pane" id="tab-map">
+        
+        <div class="map-layout-wrapper">
+          
+          <div class="map-sidebar glass-panel">
+            <div class="map-sidebar-header">
+              <span class="chart-badge">พิกัดภูมิศาสตร์</span>
+              <h3 class="sidebar-title">โครงการที่มีพิกัดแผนที่ (GIS)</h3>
+              <p class="sidebar-desc">พบโครงการก่อสร้างโครงสร้างพื้นฐานที่มีพิกัดระบุใน e-GP ทั้งหมด <strong>17 โครงการ</strong> ในพื้นที่ ต.ท่าชัย และ ต.ศรีสัชนาลัย</p>
+            </div>
+
+            <div class="map-filter-group">
+              <label class="filter-label">กรองตามปีงบประมาณ:</label>
+              <div class="pill-group" id="mapYearFilter">
+                <button class="pill-btn active" data-map-year="all">ทั้งหมด (17)</button>
+                <button class="pill-btn" data-map-year="2569">ปี 2569 (7)</button>
+                <button class="pill-btn" data-map-year="2568">ปี 2568 (10)</button>
+              </div>
+            </div>
+
+            <div class="map-project-list" id="mapProjectsList">
+              <!-- populated dynamically -->
+            </div>
+          </div>
+
+          <div class="map-display-area glass-panel">
+            <div id="leafletMap" class="leaflet-map-container"></div>
+            <div class="map-overlay-legend">
+              <div class="legend-item"><span class="legend-dot dot-69"></span> ปี 2569 (7 จุด)</div>
+              <div class="legend-item"><span class="legend-dot dot-68"></span> ปี 2568 (10 จุด)</div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 4: CONTRACTORS LEADERBOARD ================= -->
+      <section class="tab-pane" id="tab-vendors">
+        
+        <div class="leaderboard-header glass-panel">
+          <div class="lh-info">
+            <span class="chart-badge">ความโปร่งใสและคู่ค้า</span>
+            <h2 class="lh-title">ทำเนียบคู่สัญญาและผู้ชนะการเสนอราคา (Top Contractors Leaderboard)</h2>
+            <p class="lh-desc">สรุปผู้ประกอบการและหน่วยงานที่ชนะการเสนอราคาและลงนามสัญญากับเทศบาลเมืองศรีสัชนาลัย เรียงตามมูลค่าสัญญารวม</p>
+          </div>
+          <div class="lh-search">
+            <div class="search-input-wrapper">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="vendorSearchInput" placeholder="ค้นหาชื่อคู่สัญญา หรือ เลขผู้เสียภาษี...">
+            </div>
+          </div>
+        </div>
+
+        <div class="table-card glass-panel mt-3">
+          <div class="table-responsive">
+            <table class="data-table" id="vendorsTable">
+              <thead>
+                <tr>
+                  <th style="width: 70px;">อันดับ</th>
+                  <th>ชื่อคู่สัญญา / ผู้ชนะการเสนอราคา</th>
+                  <th>เลขประจำตัวผู้เสียภาษี (TIN)</th>
+                  <th class="text-center">จำนวนสัญญา</th>
+                  <th class="text-right">มูลค่าสัญญารวม</th>
+                  <th>ปีงบประมาณที่ได้รับ</th>
+                  <th>วิธีการจัดหา</th>
+                  <th class="text-center">ตรวจสอบ</th>
+                </tr>
+              </thead>
+              <tbody id="vendorsTableBody">
+                <!-- populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 5: PROJECT EXPLORER ================= -->
+      <section class="tab-pane" id="tab-projects">
+        
+        <!-- Filter Toolbar -->
+        <div class="explorer-toolbar glass-panel">
+          <div class="toolbar-row-top">
+            <div class="search-box-large">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="projectSearchInput" placeholder="พิมพ์ชื่อโครงการ, รหัสโครงการ, เลขที่สัญญา หรือผู้ชนะการเสนอราคา (ค้นหาทันที)...">
+              <button class="clear-search-btn" id="clearSearchBtn" title="ล้างคำค้นหา" style="display:none;">✕</button>
+            </div>
+            <div class="toolbar-meta-count">
+              พบ <strong id="filterMatchCount">1,165</strong> รายการ 
+              (มูลค่าสัญญา: <strong id="filterMatchSum">฿62.64M</strong>)
+            </div>
+          </div>
+
+          <div class="toolbar-row-filters">
+            
+            <div class="filter-col">
+              <label for="filterYearSelect">ปีงบประมาณ</label>
+              <select id="filterYearSelect" class="filter-select">
+                <option value="all">ทุกปีงบประมาณ (2568-2569)</option>
+                <option value="2569">ปีงบฯ 2569 (644)</option>
+                <option value="2568">ปีงบฯ 2568 (521)</option>
+              </select>
+            </div>
+
+            <div class="filter-col">
+              <label for="filterTypeSelect">ประเภทโครงการ</label>
+              <select id="filterTypeSelect" class="filter-select">
+                <option value="all">ทุกประเภทโครงการ</option>
+                <option value="จ้างก่อสร้าง">จ้างก่อสร้าง</option>
+                <option value="ซื้อ">ซื้อ</option>
+                <option value="จ้างทำของ/จ้างเหมาบริการ">จ้างทำของ / จ้างเหมาบริการ</option>
+                <option value="เช่า">เช่า</option>
+              </select>
+            </div>
+
+            <div class="filter-col">
+              <label for="filterMethodSelect">วิธีการจัดหา</label>
+              <select id="filterMethodSelect" class="filter-select">
+                <option value="all">ทุกวิธีการจัดหา</option>
+                <option value="ประกวดราคาอิเล็กทรอนิกส์ (e-bidding)">e-Bidding (ประกวดราคา)</option>
+                <option value="เฉพาะเจาะจง">เฉพาะเจาะจง</option>
+              </select>
+            </div>
+
+            <div class="filter-col">
+              <label for="filterCatSelect">หมวดหมู่งาน</label>
+              <select id="filterCatSelect" class="filter-select">
+                <option value="all">ทุกหมวดหมู่งาน</option>
+                <option value="งานถนนและโครงสร้างพื้นฐาน">งานถนนและโครงสร้างพื้นฐาน</option>
+                <option value="อาหารเสริม (นมโรงเรียน)">อาหารเสริม (นมโรงเรียน)</option>
+                <option value="สวัสดิการสังคมและคนพิการ">สวัสดิการสังคมและคนพิการ</option>
+                <option value="เทคโนโลยีและสารสนเทศ">เทคโนโลยีและสารสนเทศ</option>
+                <option value="ยานพาหนะและซ่อมบำรุง">ยานพาหนะและซ่อมบำรุง</option>
+                <option value="ประเพณี วัฒนธรรม และท่องเที่ยว">ประเพณี วัฒนธรรม และท่องเที่ยว</option>
+                <option value="นันทนาการและกีฬา">นันทนาการและกีฬา</option>
+                <option value="สาธารณสุขและสุขอนามัย">สาธารณสุขและสุขอนามัย</option>
+                <option value="วัสดุและอุปกรณ์ทั่วไป">วัสดุและอุปกรณ์ทั่วไป</option>
+                <option value="บริการและงานอื่นๆ">บริการและงานอื่นๆ</option>
+              </select>
+            </div>
+
+            <div class="filter-col">
+              <label for="filterTierSelect">ช่วงวงเงินสัญญา</label>
+              <select id="filterTierSelect" class="filter-select">
+                <option value="all">ทุกช่วงวงเงิน</option>
+                <option value="tier1">ต่ำกว่า 50,000 บาท</option>
+                <option value="tier2">50,000 - 100,000 บาท</option>
+                <option value="tier3">100,001 - 500,000 บาท</option>
+                <option value="tier4">500,001 - 1,000,000 บาท</option>
+                <option value="tier5">มากกว่า 1,000,000 บาท</option>
+              </select>
+            </div>
+
+            <div class="filter-col-action">
+              <button class="reset-filter-btn" id="btnResetFilters" title="ล้างตัวกรองทั้งหมด">
+                ล้างตัวกรอง
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Projects Table -->
+        <div class="table-card glass-panel mt-3">
+          <div class="table-responsive">
+            <table class="data-table" id="projectsTable">
+              <thead>
+                <tr>
+                  <th style="width: 70px;">ปี</th>
+                  <th style="width: 120px;">รหัสโครงการ</th>
+                  <th>ชื่อโครงการ</th>
+                  <th style="width: 110px;">ประเภท</th>
+                  <th style="width: 130px;">วิธีการจัดหา</th>
+                  <th class="text-right sortable" data-sort="budget">งบประมาณ ⇕</th>
+                  <th class="text-right sortable active" data-sort="agree">วงเงินสัญญา ⇕</th>
+                  <th class="text-right sortable" data-sort="savings">ประหยัดได้ ⇕</th>
+                  <th>ผู้ชนะการเสนอราคา</th>
+                  <th style="width: 100px;">วันลงนาม</th>
+                  <th style="width: 65px;" class="text-center">ดู</th>
+                </tr>
+              </thead>
+              <tbody id="projectsTableBody">
+                <!-- populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div class="pagination-footer" id="paginationFooter">
+            <div class="page-size-selector">
+              <span>แสดงแถว:</span>
+              <select id="pageSizeSelect" class="page-select">
+                <option value="15">15</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span id="pageInfoText">แสดง 1 - 25 จาก 1,165 รายการ</span>
+            </div>
+            <div class="pagination-buttons" id="paginationButtons">
+              <!-- populated dynamically -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Global Project Detail Modal -->
+    <div class="modal-backdrop" id="projectModalBackdrop">
+      <div class="modal-dialog glass-panel" id="projectModal">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-badge" id="modalProjectYear">ปี 2569</span>
+            <span class="modal-badge-id" id="modalProjectId">รหัส: 69029304574</span>
+          </div>
+          <button class="modal-close-btn" id="modalCloseBtn" title="ปิดหน้าต่าง">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Toast Notification -->
+    <div class="toast-notification" id="toastNotification">
+      <span class="toast-icon">✓</span>
+      <span class="toast-message" id="toastMessage">การแจ้งเตือน</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+      <div class="footer-container">
+        <div class="footer-left">
+          <p><strong>ระบบแดชบอร์ดติดตามและวิเคราะห์งบประมาณ เทศบาลเมืองศรีสัชนาลัย จังหวัดสุโขทัย</strong></p>
+          <p class="footer-sub">แหล่งข้อมูล: ระบบการจัดซื้อจัดจ้างภาครัฐ (e-GP) กรมบัญชีกลาง | ประมวลผลและพัฒนาเพื่อความโปร่งใสของภาครัฐ</p>
+        </div>
+        <div class="footer-right">
+          <span class="footer-tag">FY 2568 - 2569</span>
+          <span class="footer-tag">Ultra Fast Client Processing</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Embedded Data Script -->
+  <script src="data.js"></script>
+
+  <!-- External Chart & Map Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

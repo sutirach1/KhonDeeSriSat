@@ -1,0 +1,22 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "สำเร็จ",
+    "request": {
+        "api-key": "",
+        "year": 2569,
+        "keyword": "",
+        "dept_code": "5640502",
+        "winner_tin": "",
+        "budget_start": 0,
+        "budget_end": 0,
+        "offset": 0,
+        "limit": 20
+    },
+    "required": [],
+    "total": 644,
+    "data": {
+        "total_project": 644,
+        "total_price": 38750229.89
+    }
+}
