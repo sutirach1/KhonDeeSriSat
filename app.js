@@ -1540,10 +1540,133 @@
       .replace(/'/g, '&#039;');
   }
 
+  // ====================================================================
+  // VISITOR COUNTER ENGINE
+  // Multi-layered counter with cloud sync, session protection & offline fallback
+  // ====================================================================
+  function initVisitorCounter() {
+    const headerCountEl = document.getElementById('headerVisitorCount');
+    const totalCountEl = document.getElementById('totalVisitorCount');
+    const todayCountEl = document.getElementById('todayVisitorCount');
+    const todayDateEl = document.getElementById('visitorTodayDate');
+    const lastActiveEl = document.getElementById('visitorLastActiveText');
+
+    // Format current date in Thai (e.g. "27 ต.ค. 2569")
+    const now = new Date();
+    const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const todayDateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const thaiYear = now.getFullYear() + 543;
+    const formattedThaiDate = `${now.getDate()} ${thaiMonths[now.getMonth()]} ${thaiYear}`;
+
+    if (todayDateEl) {
+      todayDateEl.textContent = formattedThaiDate;
+    }
+
+    if (lastActiveEl) {
+      const hours = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      lastActiveEl.textContent = `อัปเดตข้อมูลล่าสุด: ${formattedThaiDate} เวลา ${hours}:${mins} น.`;
+    }
+
+    // Number roll/count animation helper
+    function animateCount(elem, target) {
+      if (!elem) return;
+      const targetNum = parseInt(target, 10);
+      if (isNaN(targetNum)) {
+        elem.textContent = target;
+        return;
+      }
+      const start = 0;
+      const duration = 1200;
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // EaseOutExpo
+        const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        const current = Math.floor(start + (targetNum - start) * ease);
+        elem.textContent = current.toLocaleString('th-TH');
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          elem.textContent = targetNum.toLocaleString('th-TH');
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Daily visit handling via localStorage
+    const savedDate = localStorage.getItem('khondee_today_date');
+    let todayCount = parseInt(localStorage.getItem('khondee_today_count') || '0', 10);
+    const sessionActive = sessionStorage.getItem('khondee_session_active');
+
+    if (savedDate !== todayDateKey) {
+      todayCount = 1;
+      localStorage.setItem('khondee_today_date', todayDateKey);
+      localStorage.setItem('khondee_today_count', todayCount.toString());
+    } else if (!sessionActive) {
+      todayCount += 1;
+      localStorage.setItem('khondee_today_count', todayCount.toString());
+    }
+
+    // Base offset for portal
+    const BASE_OFFSET = 128;
+    let localTotal = parseInt(localStorage.getItem('khondee_local_total') || '0', 10);
+    if (!localTotal || localTotal < BASE_OFFSET) {
+      localTotal = BASE_OFFSET + todayCount;
+      localStorage.setItem('khondee_local_total', localTotal.toString());
+    } else if (!sessionActive) {
+      localTotal += 1;
+      localStorage.setItem('khondee_local_total', localTotal.toString());
+    }
+
+    // Immediate snappy UI display
+    animateCount(todayCountEl, todayCount);
+    animateCount(totalCountEl, localTotal);
+    if (headerCountEl) {
+      headerCountEl.textContent = localTotal.toLocaleString('th-TH');
+    }
+
+    // Mark current session as active
+    sessionStorage.setItem('khondee_session_active', 'true');
+
+    // Cloud Hit or Get via CountAPI
+    const counterKey = 'sutirach1_khondeesrisat_v1';
+    const action = sessionActive ? 'get' : 'hit';
+    const apiUrl = `https://countapi.mileshilliard.com/api/v1/${action}/${counterKey}`;
+
+    // Fetch with 4-second timeout to avoid any hang
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+    fetch(apiUrl, { signal: controller.signal })
+      .then(res => {
+        clearTimeout(timeoutId);
+        if (!res.ok) throw new Error('Counter API status error');
+        return res.json();
+      })
+      .then(data => {
+        if (data && typeof data.value === 'number') {
+          const finalCount = BASE_OFFSET + data.value;
+          localStorage.setItem('khondee_local_total', finalCount.toString());
+          animateCount(totalCountEl, finalCount);
+          if (headerCountEl) {
+            headerCountEl.textContent = finalCount.toLocaleString('th-TH');
+          }
+        }
+      })
+      .catch(err => {
+        // Fallback silently uses localTotal already displayed
+        console.debug('Visitor counter local fallback in effect:', err.message);
+      });
+  }
+
   // Initialize on load
   document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     loadData();
+    initVisitorCounter();
   });
 
 })();

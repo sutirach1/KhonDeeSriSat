@@ -71,6 +71,17 @@
           </div>
 
           <div class="quick-tools">
+            <a href="#visitorStatsSection" class="visitor-header-pill" id="visitorHeaderPill" title="คลิกดูสถิติผู้เข้าชมแบบละเอียด">
+              <span class="visitor-live-dot"></span>
+              <svg class="visitor-icon-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span class="visitor-pill-label">ผู้เข้าชม:</span>
+              <span class="visitor-pill-count" id="headerVisitorCount">--</span>
+            </a>
             <button class="tool-btn" id="themeToggleBtn" title="สลับโหมดมืด/สว่าง">
               <span class="theme-icon-dark">🌙</span>
               <span class="theme-icon-light">☀️</span>
@@ -826,8 +837,84 @@
       <span class="toast-message" id="toastMessage">การแจ้งเตือน</span>
     </div>
 
-    <!-- Footer -->
-    <footer class="main-footer">
+    <!-- Footer with Integrated Visitor Statistics -->
+    <footer class="main-footer" id="visitorStatsSection">
+      <!-- Visitor Statistics Showcase Widget -->
+      <div class="visitor-showcase-card glass-panel">
+        <div class="visitor-card-header">
+          <div class="vcard-title-group">
+            <span class="vcard-icon-badge">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </span>
+            <div>
+              <h3 class="vcard-title">สถิติการเข้าชมแดชบอร์ด</h3>
+              <p class="vcard-subtitle">ข้อมูลการเข้าใช้งานระบบติดตามงบประมาณ e-GP เทศบาลเมืองศรีสัชนาลัย</p>
+            </div>
+          </div>
+          <div class="vcard-live-indicator">
+            <span class="vcard-ping-dot"></span>
+            <span class="vcard-live-text">ระบบกำลังทำงาน (Live)</span>
+          </div>
+        </div>
+
+        <div class="visitor-stats-grid">
+          <!-- Total Visits Card -->
+          <div class="vstat-box vstat-total">
+            <div class="vstat-meta">
+              <span class="vstat-label">ผู้เข้าชมสะสมทั้งหมด</span>
+              <span class="vstat-tag">All-Time</span>
+            </div>
+            <div class="vstat-odometer-wrap">
+              <span class="vstat-symbol">👥</span>
+              <span class="vstat-number odometer-val" id="totalVisitorCount">...</span>
+              <span class="vstat-unit">ครั้ง</span>
+            </div>
+            <div class="vstat-bar-track">
+              <div class="vstat-bar-fill vstat-bar-cyan"></div>
+            </div>
+          </div>
+
+          <!-- Today's Visits Card -->
+          <div class="vstat-box vstat-today">
+            <div class="vstat-meta">
+              <span class="vstat-label">ผู้เข้าชมวันนี้</span>
+              <span class="vstat-tag" id="visitorTodayDate">วันนี้</span>
+            </div>
+            <div class="vstat-odometer-wrap">
+              <span class="vstat-symbol">📅</span>
+              <span class="vstat-number" id="todayVisitorCount">...</span>
+              <span class="vstat-unit">ครั้ง</span>
+            </div>
+            <div class="vstat-bar-track">
+              <div class="vstat-bar-fill vstat-bar-emerald"></div>
+            </div>
+          </div>
+
+          <!-- System Status & Activity -->
+          <div class="vstat-box vstat-status">
+            <div class="vstat-meta">
+              <span class="vstat-label">สถานะการเชื่อมต่อ</span>
+              <span class="vstat-tag vstat-tag-green">พร้อมให้บริการ</span>
+            </div>
+            <div class="vstat-odometer-wrap">
+              <span class="vstat-symbol">⚡</span>
+              <span class="vstat-status-text">ออนไลน์ 100%</span>
+            </div>
+            <div class="vstat-info-text" id="visitorLastActiveText">
+              อัปเดตข้อมูลล่าสุด: วันนี้
+            </div>
+          </div>
+        </div>
+
+        <div class="visitor-footer-note">
+          <span class="privacy-badge">🔒 Privacy-Friendly</span>
+          <span>นับจำนวนการเข้าชมโดยไม่เก็บข้อมูลส่วนบุคคล เพื่อการวัดผลการเข้าถึงข้อมูลโปร่งใสภาครัฐ</span>
+        </div>
+      </div>
+
       <div class="footer-container">
         <div class="footer-left">
           <p><strong>ระบบแดชบอร์ดติดตามและวิเคราะห์งบประมาณ เทศบาลเมืองศรีสัชนาลัย จังหวัดสุโขทัย</strong></p>
